@@ -27,7 +27,7 @@ mod test {
         "This is z route in test module"
     }
 }
-
+/*
 mod disabled {
     mod_auto_mount!(disabled);
 
@@ -35,8 +35,16 @@ mod disabled {
     fn w() -> &'static str {
         "this route should be disabled"
     }
-}
+}*/
 
 fn main() {
-    rocket::ignite().auto_mount().launch();
+    prepare_rocket().launch();
 }
+
+pub fn prepare_rocket() -> rocket::Rocket {
+    rocket::ignite()
+    .mount("/", RoutesInventory::get_all_with_hint_base("/"))
+    .mount("/test", RoutesInventory::get_all_with_hint_base("/test"))
+}
+
+routes_inventory!();
