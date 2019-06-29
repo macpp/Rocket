@@ -86,7 +86,7 @@
 //! # struct LogsDbConn(diesel::SqliteConnection);
 //! #
 //! # type Logs = ();
-//! # type Result<T> = ::std::result::Result<T, ()>;
+//! # type Result<T> = std::result::Result<T, ()>;
 //! #
 //! #[get("/logs/<id>")]
 //! fn get_logs(conn: LogsDbConn, id: usize) -> Result<Logs> {
@@ -229,7 +229,7 @@
 //! allowing the type to be used as a request guard. This implementation
 //! retrieves a connection from the database pool or fails with a
 //! `Status::ServiceUnavailable` if no connections are available. The macro also
-//! generates an implementation of the [`Deref`](::std::ops::Deref) trait with
+//! generates an implementation of the [`Deref`](std::ops::Deref) trait with
 //! the internal `Poolable` type as the target.
 //!
 //! The macro will also generate two inherent methods on the decorated type:
@@ -345,18 +345,19 @@
 //! The list below includes all presently supported database adapters and their
 //! corresponding [`Poolable`] type.
 //!
-//! | Kind     | Driver                | `Poolable` Type                | Feature                |
-//! |----------|-----------------------|--------------------------------|------------------------|
-//! | MySQL    | [Diesel]              | [`diesel::MysqlConnection`]    | `diesel_mysql_pool`    |
-//! | MySQL    | [`rust-mysql-simple`] | [`mysql::Conn`]                | `mysql_pool`           |
-//! | Postgres | [Diesel]              | [`diesel::PgConnection`]       | `diesel_postgres_pool` |
-//! | Postgres | [Rust-Postgres]       | [`postgres::Connection`]       | `postgres_pool`        |
-//! | Sqlite   | [Diesel]              | [`diesel::SqliteConnection`]   | `diesel_sqlite_pool`   |
-//! | Sqlite   | [Rustqlite]           | [`rusqlite::Connection`]       | `sqlite_pool`          |
-//! | Neo4j    | [`rusted_cypher`]     | [`rusted_cypher::GraphClient`] | `cypher_pool`          |
-//! | Redis    | [`redis-rs`]          | [`redis::Connection`]          | `redis_pool`           |
-//! | MongoDB  | [`mongodb`]           | [`mongodb::db::Database`]      | `mongodb_pool`         |
-//! | Memcache | [`memcache`]          | [`memcache::Client`]           | `memcache_pool`        |
+// Note: Keep this table in sync with site/guite/6-state.md
+//! | Kind     | Driver                | Version   | `Poolable` Type                | Feature                |
+//! |----------|-----------------------|-----------|--------------------------------|------------------------|
+//! | MySQL    | [Diesel]              | `1`       | [`diesel::MysqlConnection`]    | `diesel_mysql_pool`    |
+//! | MySQL    | [`rust-mysql-simple`] | `16`      | [`mysql::conn`]                | `mysql_pool`           |
+//! | Postgres | [Diesel]              | `1`       | [`diesel::PgConnection`]       | `diesel_postgres_pool` |
+//! | Postgres | [Rust-Postgres]       | `0.15`    | [`postgres::Connection`]       | `postgres_pool`        |
+//! | Sqlite   | [Diesel]              | `1`       | [`diesel::SqliteConnection`]   | `diesel_sqlite_pool`   |
+//! | Sqlite   | [`Rustqlite`]         | `0.16`    | [`rusqlite::Connection`]       | `sqlite_pool`          |
+//! | Neo4j    | [`rusted_cypher`]     | `1`       | [`rusted_cypher::GraphClient`] | `cypher_pool`          |
+//! | Redis    | [`redis-rs`]          | `0.10`    | [`redis::Connection`]          | `redis_pool`           |
+//! | MongoDB  | [`mongodb`]           | `0.3.12`  | [`mongodb::db::Database`]      | `mongodb_pool`         |
+//! | Memcache | [`memcache`]          | `0.11`    | [`memcache::Client`]           | `memcache_pool`        |
 //!
 //! [Diesel]: https://diesel.rs
 //! [`redis::Connection`]: https://docs.rs/redis/0.9.0/redis/struct.Connection.html
@@ -369,7 +370,7 @@
 //! [`diesel::MysqlConnection`]: http://docs.diesel.rs/diesel/mysql/struct.MysqlConnection.html
 //! [`redis-rs`]: https://github.com/mitsuhiko/redis-rs
 //! [`rusted_cypher`]: https://github.com/livioribeiro/rusted-cypher
-//! [Rustqlite]: https://github.com/jgallagher/rusqlite
+//! [`Rustqlite`]: https://github.com/jgallagher/rusqlite
 //! [Rust-Postgres]: https://github.com/sfackler/rust-postgres
 //! [`rust-mysql-simple`]: https://github.com/blackbeam/rust-mysql-simple
 //! [`diesel::PgConnection`]: http://docs.diesel.rs/diesel/pg/struct.PgConnection.html
@@ -491,7 +492,7 @@ pub enum ConfigError {
     /// configuration.
     MissingKey,
     /// The configuration associated with the key isn't a
-    /// [`Table`](::rocket::config::Table).
+    /// [`Table`](rocket::config::Table).
     MalformedConfiguration,
     /// The required `url` key is missing.
     MissingUrl,
@@ -594,7 +595,7 @@ pub fn database_config<'a>(
 }
 
 impl<'a> Display for ConfigError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             ConfigError::MissingTable => {
                 write!(f, "A table named `databases` was not found for this configuration")
@@ -659,7 +660,7 @@ impl<'a> Display for ConfigError {
 /// #     use std::fmt;
 /// #     use rocket_contrib::databases::r2d2;
 /// #     #[derive(Debug)] pub struct Error;
-/// #     impl ::std::error::Error for Error {  }
+/// #     impl std::error::Error for Error {  }
 /// #     impl fmt::Display for Error {
 /// #         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { Ok(()) }
 /// #     }
@@ -667,7 +668,7 @@ impl<'a> Display for ConfigError {
 /// #     pub struct Connection;
 /// #     pub struct ConnectionManager;
 /// #
-/// #     type Result<T> = ::std::result::Result<T, Error>;
+/// #     type Result<T> = std::result::Result<T, Error>;
 /// #
 /// #     impl ConnectionManager {
 /// #         pub fn new(url: &str) -> Result<Self> { Err(Error) }
@@ -717,7 +718,7 @@ pub trait Poolable: Send + Sized + 'static {
 
     /// Creates an `r2d2` connection pool for `Manager::Connection`, returning
     /// the pool on success.
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error>;
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error>;
 }
 
 #[cfg(feature = "diesel_sqlite_pool")]
@@ -725,7 +726,7 @@ impl Poolable for diesel::SqliteConnection {
     type Manager = diesel::r2d2::ConnectionManager<diesel::SqliteConnection>;
     type Error = r2d2::Error;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = diesel::r2d2::ConnectionManager::new(config.url);
         r2d2::Pool::builder().max_size(config.pool_size).build(manager)
     }
@@ -736,7 +737,7 @@ impl Poolable for diesel::PgConnection {
     type Manager = diesel::r2d2::ConnectionManager<diesel::PgConnection>;
     type Error = r2d2::Error;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = diesel::r2d2::ConnectionManager::new(config.url);
         r2d2::Pool::builder().max_size(config.pool_size).build(manager)
     }
@@ -747,7 +748,7 @@ impl Poolable for diesel::MysqlConnection {
     type Manager = diesel::r2d2::ConnectionManager<diesel::MysqlConnection>;
     type Error = r2d2::Error;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = diesel::r2d2::ConnectionManager::new(config.url);
         r2d2::Pool::builder().max_size(config.pool_size).build(manager)
     }
@@ -759,7 +760,7 @@ impl Poolable for postgres::Connection {
     type Manager = r2d2_postgres::PostgresConnectionManager;
     type Error = DbError<postgres::Error>;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = r2d2_postgres::PostgresConnectionManager::new(config.url, r2d2_postgres::TlsMode::None)
             .map_err(DbError::Custom)?;
 
@@ -773,7 +774,7 @@ impl Poolable for mysql::Conn {
     type Manager = r2d2_mysql::MysqlConnectionManager;
     type Error = r2d2::Error;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let opts = mysql::OptsBuilder::from_opts(config.url);
         let manager = r2d2_mysql::MysqlConnectionManager::new(opts);
         r2d2::Pool::builder().max_size(config.pool_size).build(manager)
@@ -785,7 +786,7 @@ impl Poolable for rusqlite::Connection {
     type Manager = r2d2_sqlite::SqliteConnectionManager;
     type Error = r2d2::Error;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = r2d2_sqlite::SqliteConnectionManager::file(config.url);
 
         r2d2::Pool::builder().max_size(config.pool_size).build(manager)
@@ -797,7 +798,7 @@ impl Poolable for rusted_cypher::GraphClient {
     type Manager = r2d2_cypher::CypherConnectionManager;
     type Error = r2d2::Error;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = r2d2_cypher::CypherConnectionManager { url: config.url.to_string() };
         r2d2::Pool::builder().max_size(config.pool_size).build(manager)
     }
@@ -808,7 +809,7 @@ impl Poolable for redis::Connection {
     type Manager = r2d2_redis::RedisConnectionManager;
     type Error = DbError<redis::RedisError>;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = r2d2_redis::RedisConnectionManager::new(config.url).map_err(DbError::Custom)?;
         r2d2::Pool::builder().max_size(config.pool_size).build(manager)
             .map_err(DbError::PoolError)
@@ -820,7 +821,7 @@ impl Poolable for mongodb::db::Database {
     type Manager = r2d2_mongodb::MongodbConnectionManager;
     type Error = DbError<mongodb::Error>;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = r2d2_mongodb::MongodbConnectionManager::new_with_uri(config.url).map_err(DbError::Custom)?;
         r2d2::Pool::builder().max_size(config.pool_size).build(manager).map_err(DbError::PoolError)
     }
@@ -831,7 +832,7 @@ impl Poolable for memcache::Client {
     type Manager = r2d2_memcache::MemcacheConnectionManager;
     type Error = DbError<memcache::MemcacheError>;
 
-    fn pool(config: DatabaseConfig) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
+    fn pool(config: DatabaseConfig<'_>) -> Result<r2d2::Pool<Self::Manager>, Self::Error> {
         let manager = r2d2_memcache::MemcacheConnectionManager::new(config.url);
         r2d2::Pool::builder().max_size(config.pool_size).build(manager).map_err(DbError::PoolError)
     }
