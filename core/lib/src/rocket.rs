@@ -523,6 +523,10 @@ impl Rocket {
 
         self
     }
+    
+    pub fn auto_mount<R: crate::auto_mount::RoutesCollection> (self, base: &str) ->  Self {
+        self.mount(base, R::with_hint_mount_point(base))
+    }
 
     /// Registers all of the catchers in the supplied vector.
     ///

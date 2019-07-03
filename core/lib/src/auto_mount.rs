@@ -1,11 +1,11 @@
-pub struct AutoMountModuleInfo {
-    pub base: &'static str,
+pub struct AutoMountModuleHint {
+    pub mount_point: &'static str,
     pub enabled: bool,
 }
 
 pub mod __default_auto_mount_info {
     use super::*;
-    pub static __rocket_mod_auto_mount_info : AutoMountModuleInfo = AutoMountModuleInfo {base: "/", enabled: true};
+    pub static __ROCKED_MOD_AUTO_MOUNT_INFO : AutoMountModuleHint = AutoMountModuleHint {mount_point: "/", enabled: true};
 }
 
 /// Allows to configure behavior of [auto_mount()](Rocket::auto_mount) for all routes in module
@@ -15,10 +15,10 @@ pub mod __default_auto_mount_info {
 /// ```rust
 /// # #![feature(proc_macro_hygiene, decl_macro)]
 /// # #[macro_use] extern crate rocket;
-/// use rocket::{mod_auto_mount,get};
+/// use rocket::{auto_mount_mod_hint,get};
 ///
 /// mod secret_routes {
-///     mod_auto_mount!("/foo");
+///     auto_mount_mod_hint!("/foo");
 ///
 ///     // this route will be mounted at /foo/bar when auto_mount() is used
 ///     #[get("/bar")]
@@ -33,10 +33,10 @@ pub mod __default_auto_mount_info {
 /// ```rust
 /// # #![feature(proc_macro_hygiene, decl_macro)]
 /// # #[macro_use] extern crate rocket;
-/// use rocket::{mod_auto_mount,get};
+/// use rocket::{auto_mount_mod_hint,get};
 ///
 /// mod secret_routes {
-///     mod_auto_mount!(disabled);
+///     auto_mount_mod_hint!(disabled);
 ///
 ///     // this route will not be mounted by auto_mount()
 ///     #[get("/secret")]
@@ -45,54 +45,60 @@ pub mod __default_auto_mount_info {
 ///     }
 /// }
 /// ```
-#[macro_export]
-macro_rules! mod_auto_mount {
+#[macro_export] 
+// TODO: since its hint, it should be possible to set mounting point for disabled module
+// TODO: additional field (&'static Any or something) for user data
+macro_rules! auto_mount_mod_hint {
     ($l:literal) => {
-        use $crate::auto_mount::AutoMountModuleInfo;
-        static __rocket_mod_auto_mount_info : AutoMountModuleInfo = AutoMountModuleInfo {base: $l, enabled: true};
+        use $crate::auto_mount::AutoMountModuleHint;
+        static __ROCKED_MOD_AUTO_MOUNT_INFO : AutoMountModuleHint = AutoMountModuleHint {mount_point: $l, enabled: true};
     };
     (disabled) => {
-        use $crate::auto_mount::AutoMountModuleInfo;
-        static __rocket_mod_auto_mount_info : AutoMountModuleInfo = AutoMountModuleInfo {base: "/", enabled: false};
+        use $crate::auto_mount::AutoMountModuleHint;
+        static __ROCKED_MOD_AUTO_MOUNT_INFO : AutoMountModuleHint = AutoMountModuleHint {mount_point: "/", enabled: false};
+    }
+}
+
+pub trait RoutesCollection {
+    fn unfiltred() -> Vec<(crate::Route,&'static AutoMountModuleHint)>;
+    fn all_enabled() -> Vec<crate::Route> {
+        Self::unfiltred()
+        .into_iter()
+        .filter(|x| x.1.enabled)
+        .map(|x| x.0)
+        .collect()
+    }
+    fn with_hint_mount_point(path: &str) -> Vec<crate::Route> {
+        Self::unfiltred()
+        .into_iter()
+        .filter(|x| x.1.mount_point == path && x.1.enabled)
+        .map(|x| x.0)
+        .collect()
     }
 }
 
 #[macro_export]
 macro_rules! routes_inventory {
     () => {
-        pub(crate)struct RoutesInventory {
-            pub mod_info: &'static $crate::auto_mount::AutoMountModuleInfo,
+        routes_inventory!(pub(crate));
+    };
+    ($x : vis) => {
+        $x struct RoutesInventory {
+            pub mod_hint: &'static $crate::auto_mount::AutoMountModuleHint,
             pub route: &'static $crate::StaticRouteInfo,
         }
-        impl RoutesInventory {
-            pub fn get_all() -> Vec<$crate::Route> {
-                println!("getting all the routes!");
+        impl $crate::auto_mount::RoutesCollection for crate::RoutesInventory {
+            fn unfiltred() -> Vec<($crate::Route,&'static $crate::auto_mount::AutoMountModuleHint)> {
                 let mut v = vec![];
-                for route in $crate::inventory::iter::<RoutesInventory > {
-                    /*if route.mod_info.enabled {
-                        self = self.mount(route.mod_info.base,vec![route.route.into()]);
-                    }*/
-                    v.push(route.route.into());
+                for route_info in $crate::inventory::iter::<RoutesInventory > {
+                    v.push((route_info.route.into(), route_info.mod_hint));
                 }
-                println!("total routes: {}", v.len());
-                v
-            }
-
-            pub fn get_all_with_hint_base(hint_base: &str) -> Vec<$crate::Route> {
-                println!("getting all the routes with hint!");
-                let mut v = vec![];
-                for route in $crate::inventory::iter::<RoutesInventory > {
-                    /*if route.mod_info.enabled {
-                        self = self.mount(route.mod_info.base,vec![route.route.into()]);
-                    }*/
-                    if hint_base == route.mod_info.base {
-                        v.push(route.route.into());
-                    }
-                }
-                println!("total routes: {}", v.len());
                 v
             }
         }
         $crate::inventory::collect!(RoutesInventory);
+
+        #[cfg(not(rocket_codegen_auto_mounting))]
+        compile_error!("Auto mouting not configured properly! See documentation of this macro for more information.");
     }
 }

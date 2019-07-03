@@ -25,8 +25,8 @@ fn auto_mount() {
     let response = client.get("/z").dispatch();
     assert_eq!(response.status(), Status::NotFound);
 
-    //let response = client.get("/w").dispatch();
-    //assert_eq!(response.status(), Status::NotFound);
+    let response = client.get("/w").dispatch();
+    assert_eq!(response.status(), Status::NotFound);
 
     let response = client.get("/test/x").dispatch();
     assert_eq!(response.status(), Status::NotFound);

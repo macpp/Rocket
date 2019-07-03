@@ -1,6 +1,7 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use] extern crate rocket;
+use rocket::auto_mount::RoutesCollection;
 
 #[cfg(test)] mod tests;
 
@@ -15,7 +16,7 @@ fn x() -> &'static str {
 }
 
 mod test {
-    mod_auto_mount!("/test");
+    auto_mount_mod_hint!("/test");
 
     #[get("/y")] // will be mounted to /test/y
     fn y() -> &'static str {
@@ -27,15 +28,15 @@ mod test {
         "This is z route in test module"
     }
 }
-/*
+
 mod disabled {
-    mod_auto_mount!(disabled);
+    auto_mount_mod_hint!(disabled);
 
     #[get("/w")] // will not be mounted
     fn w() -> &'static str {
         "this route should be disabled"
     }
-}*/
+}
 
 fn main() {
     prepare_rocket().launch();
@@ -43,8 +44,8 @@ fn main() {
 
 pub fn prepare_rocket() -> rocket::Rocket {
     rocket::ignite()
-    .mount("/", RoutesInventory::get_all_with_hint_base("/"))
-    .mount("/test", RoutesInventory::get_all_with_hint_base("/test"))
+    .mount("/", RoutesInventory::with_hint_mount_point("/"))
+    .mount("/test", RoutesInventory::with_hint_mount_point("/test"))
 }
 
 routes_inventory!();

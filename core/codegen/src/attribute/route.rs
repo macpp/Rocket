@@ -338,8 +338,6 @@ fn generate_internal_uri_macro(route: &Route) -> TokenStream2 {
 }
 
 fn generate_auto_mount(generated_struct_name: &syn::Ident) -> TokenStream2 {
-
-
     #[cfg(feature="auto-mount")]
     {
         quote! {
@@ -349,7 +347,7 @@ fn generate_auto_mount(generated_struct_name: &syn::Ident) -> TokenStream2 {
             #[cfg(rocket_codegen_auto_mounting)]
             rocket::inventory::submit!{
                 #![crate = rocket]
-                crate::RoutesInventory {route:  & #generated_struct_name, mod_info: &__rocket_mod_auto_mount_info}
+                crate::RoutesInventory {route:  & #generated_struct_name, mod_hint: &__ROCKED_MOD_AUTO_MOUNT_INFO}
             }
         }
     }
