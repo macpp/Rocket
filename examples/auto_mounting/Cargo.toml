@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 rocket = { path = "../../core/lib", features=["auto-mount"]}
+auto_mount_lib = {path = "auto_mount_lib"}

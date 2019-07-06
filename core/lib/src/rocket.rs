@@ -527,6 +527,7 @@ impl Rocket {
     pub fn auto_mount_with_base<R: crate::auto_mount::RoutesCollection> (self, base: &str) ->  Self {
         self.mount(base, R::with_hint_mount_point(base))
     }
+    
     #[cfg(feature="auto-mount")]
     pub fn auto_mount_all<R: crate::auto_mount::RoutesCollection> (mut self) ->  Self {
         let mut map : HashMap<&'static str, Vec<Route>> = HashMap::new();

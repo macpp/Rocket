@@ -9,38 +9,37 @@ fn hello() -> &'static str {
     "Hello, world!"
 }
 
-#[get("/x")]
+#[get("/info")]
 fn x() -> &'static str {
-    "This is x route"
+    "this is test web server"
 }
 
-mod test {
-    //TODO: example with more convincing usage of this macro (ex: /user that is mounted as user and user_legacy)
-    auto_mount_mod_hint!("/test");
+mod user {
+    auto_mount_mod_hint!("/user");
 
-    #[get("/y")] // will be mounted to /test/y
+    #[get("/about")] // will be mounted to /test/y
     fn y() -> &'static str {
-        "This is y route in test module"
+        "current user is unnown"
     }
 
-    #[get("/z")] // will be mounted to /test/z
+    #[get("/logout")] // will be mounted to /test/z
     fn z() -> &'static str {
-        "This is z route in test module"
+        "logged out!"
     }
 }
 
-mod disabled {
+mod secret_routes {
     auto_mount_mod_hint!(disabled);
 
-    #[get("/w")] // will not be mounted
+    #[get("/secret")] // will not be mounted
     fn w() -> &'static str {
-        "this route should be disabled"
+        "secret route!"
     }
 }
 
 fn main() {
    rocket::ignite()
-   .auto_mount_all::<RoutesInventory>()
+   .auto_mount_all::<RoutesInventory>() // see tests for more automounting options
    .launch();
 }
 
