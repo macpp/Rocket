@@ -3,7 +3,7 @@ use rocket::local::Client;
 use rocket::http::Status;
 
 #[test]
-fn auto_mount() {
+fn auto_mount_all() {
     let rocket = rocket::ignite()
    .auto_mount_all::<crate::RoutesInventory>(); // TODO: tests for other mounting styles
     let client = Client::new(rocket).unwrap();

@@ -46,8 +46,7 @@ pub mod __default_auto_mount_info {
 /// }
 /// ```
 #[macro_export] 
-// TODO: since its hint, it should be possible to set mounting point for disabled module
-// TODO: additional field (&'static Any or something) for user data
+// TODO: additional field (&'static Any or something) for user data??
 //TODO: rename to auto_mount_hint ?
 macro_rules! auto_mount_mod_hint {
     ($l:literal) => {
@@ -68,46 +67,46 @@ pub struct AutoRoute(pub crate::Route,pub &'static AutoMountModuleHint);
 
 pub trait RoutesCollection {
     //TODO: maybe it should be hashmap of something? -> nope, what if two moduls with auto_mount_hint("/asdf")? 
-    fn unfiltred() -> &'static[(AutoRoute)];
-    fn all_enabled() -> Vec<crate::Route> {
-        Self::unfiltred()
-        .iter()
-        .filter(|x| x.1.enabled)
-        .map(|x| x.0.clone())
-        .collect()
-    }
+    fn unfiltred() -> Vec<AutoRoute>;
     fn with_hint_mount_point(path: &str) -> Vec<crate::Route> {
         Self::unfiltred()
-        .iter()
+        .into_iter()
         .filter(|x| x.1.mount_point == path && x.1.enabled)
-        .map(|x| x.0.clone())
+        .map(|x| x.0)
+        .collect()
+    }
+}
+
+impl<T> RoutesCollection for T
+where T: inventory::Collect,
+AutoRoute: From<&'static T> {
+    fn unfiltred() -> Vec<AutoRoute> {
+        inventory::iter::<T>.into_iter()
+        .map(|x| x.into())
         .collect()
     }
 }
 
 #[macro_export]
+// TODO: only  pub and pub(crate) should be allowed? 
 macro_rules! routes_inventory {
     () => {
         routes_inventory!(pub(crate));
     };
     ($x : vis) => {
-        $x struct RoutesInventory {
-            pub mod_hint: &'static $crate::auto_mount::AutoMountModuleHint,
-            pub route: &'static $crate::StaticRouteInfo,
+
+        $x struct RoutesInventory ( //basicly clone of AutoRoute - each crate must have it's own to destinguish between crates
+            &'static $crate::StaticRouteInfo,
+            &'static $crate::auto_mount::AutoMountModuleHint,
+        );
+        impl RoutesInventory {
+            pub fn new(route: &'static $crate::StaticRouteInfo,mod_hint: &'static $crate::auto_mount::AutoMountModuleHint) -> Self {
+                RoutesInventory (route, mod_hint)
+            }
         }
-        impl $crate::auto_mount::RoutesCollection for crate::RoutesInventory {
-            fn unfiltred() -> &'static[($crate::auto_mount::AutoRoute)] {
-                $crate::lazy_static::lazy_static! {
-                    static ref ALL_ROUTES: Vec<($crate::auto_mount::AutoRoute)> = {
-                        let mut v = vec![];
-                            for route_info in $crate::inventory::iter::<RoutesInventory > {
-                                v.push($crate::auto_mount::AutoRoute(route_info.route.into(), route_info.mod_hint));
-                            }
-                        v
-                    };
-                }
-                ALL_ROUTES.as_slice()
-                
+        impl From<&'static RoutesInventory> for $crate::auto_mount::AutoRoute {
+            fn from (x: &RoutesInventory) -> $crate::auto_mount::AutoRoute {
+                $crate::auto_mount::AutoRoute(x.0.into(), x.1)
             }
         }
         $crate::inventory::collect!(RoutesInventory);

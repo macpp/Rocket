@@ -347,7 +347,7 @@ fn generate_auto_mount(generated_struct_name: &syn::Ident) -> TokenStream2 {
             #[cfg(rocket_codegen_auto_mounting)]
             rocket::inventory::submit!{
                 #![crate = rocket]
-                crate::RoutesInventory {route:  & #generated_struct_name, mod_hint: &__ROCKED_MOD_AUTO_MOUNT_INFO}
+                crate::RoutesInventory::new(& #generated_struct_name, &__ROCKED_MOD_AUTO_MOUNT_INFO)
             }
         }
     }

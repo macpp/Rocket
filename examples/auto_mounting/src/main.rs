@@ -15,6 +15,7 @@ fn x() -> &'static str {
 }
 
 mod test {
+    //TODO: example with more convincing usage of this macro (ex: /user that is mounted as user and user_legacy)
     auto_mount_mod_hint!("/test");
 
     #[get("/y")] // will be mounted to /test/y
