@@ -48,10 +48,15 @@ pub mod __default_auto_mount_info {
 #[macro_export] 
 // TODO: since its hint, it should be possible to set mounting point for disabled module
 // TODO: additional field (&'static Any or something) for user data
+//TODO: rename to auto_mount_hint ?
 macro_rules! auto_mount_mod_hint {
     ($l:literal) => {
         use $crate::auto_mount::AutoMountModuleHint;
         static __ROCKED_MOD_AUTO_MOUNT_INFO : AutoMountModuleHint = AutoMountModuleHint {mount_point: $l, enabled: true};
+    };
+    ($l:literal,disabled) => {
+        use $crate::auto_mount::AutoMountModuleHint;
+        static __ROCKED_MOD_AUTO_MOUNT_INFO : AutoMountModuleHint = AutoMountModuleHint {mount_point: $l, enabled: false};
     };
     (disabled) => {
         use $crate::auto_mount::AutoMountModuleHint;
@@ -59,20 +64,23 @@ macro_rules! auto_mount_mod_hint {
     }
 }
 
+pub struct AutoRoute(pub crate::Route,pub &'static AutoMountModuleHint);
+
 pub trait RoutesCollection {
-    fn unfiltred() -> Vec<(crate::Route,&'static AutoMountModuleHint)>;
+    //TODO: maybe it should be hashmap of something? -> nope, what if two moduls with auto_mount_hint("/asdf")? 
+    fn unfiltred() -> &'static[(AutoRoute)];
     fn all_enabled() -> Vec<crate::Route> {
         Self::unfiltred()
-        .into_iter()
+        .iter()
         .filter(|x| x.1.enabled)
-        .map(|x| x.0)
+        .map(|x| x.0.clone())
         .collect()
     }
     fn with_hint_mount_point(path: &str) -> Vec<crate::Route> {
         Self::unfiltred()
-        .into_iter()
+        .iter()
         .filter(|x| x.1.mount_point == path && x.1.enabled)
-        .map(|x| x.0)
+        .map(|x| x.0.clone())
         .collect()
     }
 }
@@ -88,12 +96,18 @@ macro_rules! routes_inventory {
             pub route: &'static $crate::StaticRouteInfo,
         }
         impl $crate::auto_mount::RoutesCollection for crate::RoutesInventory {
-            fn unfiltred() -> Vec<($crate::Route,&'static $crate::auto_mount::AutoMountModuleHint)> {
-                let mut v = vec![];
-                for route_info in $crate::inventory::iter::<RoutesInventory > {
-                    v.push((route_info.route.into(), route_info.mod_hint));
+            fn unfiltred() -> &'static[($crate::auto_mount::AutoRoute)] {
+                $crate::lazy_static::lazy_static! {
+                    static ref ALL_ROUTES: Vec<($crate::auto_mount::AutoRoute)> = {
+                        let mut v = vec![];
+                            for route_info in $crate::inventory::iter::<RoutesInventory > {
+                                v.push($crate::auto_mount::AutoRoute(route_info.route.into(), route_info.mod_hint));
+                            }
+                        v
+                    };
                 }
-                v
+                ALL_ROUTES.as_slice()
+                
             }
         }
         $crate::inventory::collect!(RoutesInventory);

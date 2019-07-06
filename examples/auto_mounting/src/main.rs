@@ -1,7 +1,6 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use] extern crate rocket;
-use rocket::auto_mount::RoutesCollection;
 
 #[cfg(test)] mod tests;
 
@@ -39,13 +38,9 @@ mod disabled {
 }
 
 fn main() {
-    prepare_rocket().launch();
-}
-
-pub fn prepare_rocket() -> rocket::Rocket {
-    rocket::ignite()
-    .mount("/", RoutesInventory::with_hint_mount_point("/"))
-    .mount("/test", RoutesInventory::with_hint_mount_point("/test"))
+   rocket::ignite()
+   .auto_mount_all::<RoutesInventory>()
+   .launch();
 }
 
 routes_inventory!();

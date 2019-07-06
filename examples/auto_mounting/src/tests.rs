@@ -4,7 +4,8 @@ use rocket::http::Status;
 
 #[test]
 fn auto_mount() {
-    let rocket = crate::prepare_rocket();
+    let rocket = rocket::ignite()
+   .auto_mount_all::<crate::RoutesInventory>(); // TODO: tests for other mounting styles
     let client = Client::new(rocket).unwrap();
 
     let mut response = client.get("/").dispatch();

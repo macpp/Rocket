@@ -104,6 +104,7 @@
 #[macro_use] extern crate log;
 #[macro_use] extern crate pear;
 #[cfg(feature="auto-mount")] #[doc(hidden)]pub extern crate inventory;
+#[cfg(feature="auto-mount")] #[doc(hidden)]pub extern crate lazy_static;
 #[doc(hidden)] #[macro_use] pub mod logger;
 pub mod local;
 pub mod request;
