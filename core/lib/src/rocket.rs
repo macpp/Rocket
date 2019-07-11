@@ -523,28 +523,6 @@ impl Rocket {
 
         self
     }
-    #[cfg(feature="auto-mount")]
-    pub fn auto_mount_with_base<R: crate::auto_mount::RoutesCollection> (self, base: &str) ->  Self {
-        self.mount(base, R::with_hint_mount_point(base))
-    }
-    
-    #[cfg(feature="auto-mount")]
-    pub fn auto_mount_all<R: crate::auto_mount::RoutesCollection> (mut self) ->  Self {
-        let mut map : HashMap<&'static str, Vec<Route>> = HashMap::new();
-        for route in R::unfiltred().into_iter() {
-            if !route.1.enabled {
-                continue; 
-            }
-            match map.get_mut(route.1.mount_point) {
-                Some(v) => v.push(route.0),
-                None => {map.insert(route.1.mount_point,vec![route.0]);},
-            }
-        }
-        for (key,val) in map.into_iter() {
-            self = self.mount(key,val); 
-        }
-        self
-    }
 
     /// Registers all of the catchers in the supplied vector.
     ///
@@ -831,5 +809,31 @@ impl Rocket {
     #[inline(always)]
     pub fn config(&self) -> &Config {
         &self.config
+    }
+
+    #[cfg(feature="auto-mount")]
+    pub fn auto_mount_with_base<R: crate::auto_mount::RoutesCollection> (self, base: &str) ->  Self {
+        self.mount(base, R::with_hint_mount_point(base))
+    }
+    
+    #[cfg(feature="auto-mount")]
+    pub fn auto_mount_all<R: crate::auto_mount::RoutesCollection> (mut self) ->  Self {
+        let mut map : HashMap<&'static str, Vec<Route>> = HashMap::new();
+        for route in R::unfiltred().into_iter() {
+            if !route.1.enabled {
+                continue; 
+            }
+            println!("route: {}, hint: {:?},",route.0,route.1);
+            match map.get_mut(route.1.mount_point) {
+
+                
+                Some(v) => v.push(route.0),
+                None => {map.insert(route.1.mount_point,vec![route.0]);},
+            }
+        }
+        for (key,val) in map.into_iter() {
+            self = self.mount(key,val); 
+        }
+        self
     }
 }

@@ -15,7 +15,7 @@ fn x() -> &'static str {
 }
 
 mod user {
-    auto_mount_mod_hint!("/user");
+    auto_mount_hint!("/user");
 
     #[get("/about")] // will be mounted to /test/y
     fn y() -> &'static str {
@@ -29,7 +29,7 @@ mod user {
 }
 
 mod secret_routes {
-    auto_mount_mod_hint!(disabled);
+    auto_mount_hint!(enabled=false);
 
     #[get("/secret")] // will not be mounted
     fn w() -> &'static str {

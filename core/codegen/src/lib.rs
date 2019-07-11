@@ -971,3 +971,8 @@ pub fn uri(input: TokenStream) -> TokenStream {
 pub fn rocket_internal_uri(input: TokenStream) -> TokenStream {
     emit!(bang::uri_internal_macro(input))
 }
+
+#[proc_macro_attribute]
+pub fn auto_mount_hint1 (args: TokenStream, input: TokenStream) -> TokenStream {
+    emit!(attribute::auto_mount_hint::auto_mount_hint_attribute(args,input))
+}

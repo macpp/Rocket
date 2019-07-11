@@ -342,12 +342,12 @@ fn generate_auto_mount(generated_struct_name: &syn::Ident) -> TokenStream2 {
     {
         quote! {
             #[allow(unused_imports)]
-            use ::rocket::auto_mount::__default_auto_mount_info::*;
+            use ::rocket::auto_mount::__default_auto_mount_hint::*;
 
             #[cfg(rocket_codegen_auto_mounting)]
             rocket::inventory::submit!{
                 #![crate = rocket]
-                crate::RoutesInventory::new(& #generated_struct_name, &__ROCKED_MOD_AUTO_MOUNT_INFO)
+                crate::RoutesInventory::new(& #generated_struct_name, &__ROCKED_AUTO_MOUNT_HINT)
             }
         }
     }
