@@ -98,6 +98,17 @@
 // proc-macros, and 2) result in proc-macros pointing to the wrong docs.
 #[doc(hidden)] pub use rocket_codegen::*;
 
+use proc_macro_hack::proc_macro_hack;
+
+#[doc(hidden)] #[proc_macro_hack] pub use rocket_codegen::routes;
+
+#[doc(hidden)] #[proc_macro_hack] pub use rocket_codegen::catchers;
+
+#[doc(hidden)] #[proc_macro_hack] pub use rocket_codegen::uri;
+
+#[doc(hidden)] #[proc_macro_hack(support_nested)] pub use rocket_codegen::rocket_internal_uri;
+
+
 #[macro_use] extern crate log;
 #[macro_use] extern crate pear;
 

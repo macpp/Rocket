@@ -62,6 +62,7 @@
 extern crate proc_macro;
 
 use rocket_http as http;
+use proc_macro_hack::proc_macro_hack;
 
 macro_rules! vars_and_mods {
     ($($name:ident => $path:path,)*) => {
@@ -799,7 +800,7 @@ pub fn derive_uri_display_path(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// [`Route`]: ../rocket/struct.Route.html
-#[proc_macro]
+#[proc_macro_hack]
 pub fn routes(input: TokenStream) -> TokenStream {
     emit!(bang::routes_macro(input))
 }
@@ -853,7 +854,7 @@ pub fn routes(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// [`Catcher`]: ../rocket/struct.Catcher.html
-#[proc_macro]
+#[proc_macro_hack]
 pub fn catchers(input: TokenStream) -> TokenStream {
     emit!(bang::catchers_macro(input))
 }
@@ -974,13 +975,13 @@ pub fn catchers(input: TokenStream) -> TokenStream {
 /// [`FromUriParam`]: ../rocket/http/uri/trait.FromUriParam.html
 /// [`UriDisplay`]: ../rocket/http/uri/trait.UriDisplay.html
 /// [`Ignorable`]: ../rocket/http/uri/trait.Ignorable.html
-#[proc_macro]
+#[proc_macro_hack]
 pub fn uri(input: TokenStream) -> TokenStream {
     emit!(bang::uri_macro(input))
 }
 
 #[doc(hidden)]
-#[proc_macro]
+#[proc_macro_hack]
 pub fn rocket_internal_uri(input: TokenStream) -> TokenStream {
     emit!(bang::uri_internal_macro(input))
 }
