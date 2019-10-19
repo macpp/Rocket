@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene)]
-
 #[cfg(test)] mod tests;
 
 use rocket::{get, routes};
