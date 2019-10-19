@@ -613,7 +613,6 @@ impl<S, E, F> Outcome<S, E, F> {
 /// ## Example
 ///
 /// ```rust,no_run
-/// # #![feature(proc_macro_hygiene)]
 /// # #[macro_use] extern crate rocket;
 /// # use std::sync::atomic::{AtomicUsize, Ordering};
 /// use rocket::request::{self, Request, FromRequest, State};

@@ -17,7 +17,6 @@ use yansi::Paint;
 /// automatically:
 ///
 /// ```rust
-/// # #![feature(proc_macro_hygiene)]
 /// use std::io::{self, Read};
 ///
 /// # use rocket::post;
@@ -36,7 +35,6 @@ use yansi::Paint;
 /// [`Result::map_err()`]:
 ///
 /// ```rust
-/// # #![feature(proc_macro_hygiene)]
 /// use std::string::FromUtf8Error;
 ///
 /// # use rocket::get;
