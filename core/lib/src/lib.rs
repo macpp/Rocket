@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene)]
-
 #![recursion_limit="256"]
 
 #![doc(html_root_url = "https://api.rocket.rs/v0.5")]
@@ -47,7 +45,6 @@
 //! Then, add the following to the top of your `main.rs` file:
 //!
 //! ```rust
-//! #![feature(proc_macro_hygiene)]
 //!
 //! #[macro_use] extern crate rocket;
 //! # #[get("/")] fn hello() { }
@@ -58,7 +55,6 @@
 //! write Rocket applications. Here's a simple example to get you started:
 //!
 //! ```rust
-//! #![feature(proc_macro_hygiene)]
 //!
 //! #[macro_use] extern crate rocket;
 //!

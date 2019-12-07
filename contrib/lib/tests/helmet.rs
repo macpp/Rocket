@@ -1,4 +1,3 @@
-#![feature(proc_macro_hygiene)]
 
 #[macro_use]
 #[cfg(feature = "helmet")]
