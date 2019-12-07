@@ -35,7 +35,8 @@ time = "0.1"
 memchr = "2" # TODO: Use pear instead.
 base64 = "0.11"
 base16 = "0.2"
-pear = "0.1"
+#pear = "0.1"
+pear = {path = "../../../Pear1/lib"}
 atty = "0.2"
 proc-macro-hack = "0.5"
 proc-macro-nested = "0.1"
